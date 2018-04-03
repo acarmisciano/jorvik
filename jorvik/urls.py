@@ -330,4 +330,7 @@ urlpatterns = [
     url(r'^jsi18n/$', javascript_catalog, js_info_dict, name='javascript-catalog'),
     # OAuth 2.0
     # url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    # SAML
+    url(r'^attrs/$', 'saml.views.attrs', name='attrs'),
+    url(r'^metadata/$', 'saml.views.metadata', name='metadata'),
 ]
