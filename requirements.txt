@@ -10,6 +10,7 @@ codicefiscale==0.9
 cryptography==2.2.1
 csscompressor==0.9.4
 cssselect==0.9.1
+defusedxml==0.5.0
 Django==1.9.12
 django-appconf==1.0.2
 django-autocomplete-light==2.3.3
@@ -44,6 +45,7 @@ google-api-python-client==1.6.5
 googlemaps==2.2
 httplib2==0.11.0
 idna==2.6
+isodate==0.6.0
 kombu==4.1.0
 lxml==4.1.1
 Markdown==2.6
@@ -52,6 +54,7 @@ newrelic==2.60.0.46
 oauth2client==4.1.2
 phonenumbers==8.8.9
 Pillow==3.2.0
+pkgconfig==1.3.1
 ply==3.11
 psycopg2==2.7.3.2
 pyasn1==0.4.2
@@ -62,6 +65,7 @@ pycrypto==2.6.1
 pyOpenSSL==17.5.0
 python-dateutil==2.7.0
 python-stdnum==1.2
+python3-saml==1.4.0
 pytz==2018.3
 qrcode==4.0.4
 rcssmin==1.0.6
@@ -79,4 +83,5 @@ uritemplate==3.0.0
 urllib3==1.22
 vine==1.1.4
 XlsxWriter==0.7.7
+xmlsec==1.3.3
 YubiOTP==0.2.1
