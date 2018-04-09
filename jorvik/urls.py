@@ -332,6 +332,7 @@ urlpatterns = [
     # OAuth 2.0
     # url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     # SAML
+    url(r'^login_saml/$', 'saml.views.index', name='index'),
     url(r'^attrs/$', 'saml.views.attrs', name='attrs'),
     url(r'^metadata/$', 'saml.views.metadata', name='metadata'),
 ]

@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_totp',
     'otp_yubikey',
     'two_factor',
+    'saml',
 ]
 
 
