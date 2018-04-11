@@ -81,6 +81,9 @@ class CorsoBase(Corso, ConVecchioID, ConPDF):
     op_attivazione = models.CharField(max_length=255, blank=True, null=True)
     op_convocazione = models.CharField(max_length=255, blank=True, null=True)
 
+    ultima_notifica_pendenza = models.DateTimeField("Ultima notifica pendenza", blank=True,
+                                                    null=True)
+
     PUOI_ISCRIVERTI_OK = "IS"
     PUOI_ISCRIVERTI = (PUOI_ISCRIVERTI_OK,)
 
@@ -381,6 +384,38 @@ class CorsoBase(Corso, ConVecchioID, ConPDF):
             modello="pdf_corso_base_esame_verbale.html",
         )
         return pdf
+
+    def informa_presidente(self):
+        """ Invia una notifica al presidente informandolo di
+        qualcosa riferita al corso """
+        if not self.sede:
+            return
+
+        if not self.sede.presidente:
+            return
+
+        # TODO:
+        Messaggio.costruisci_e_accoda(
+            oggetto="Corso in preparazione %s" % self.nome,
+            modello="email_notifica_corso_pendente.html",
+            corpo={
+                "corso": self,
+            },
+            destinatari=[self.sede.presidente],
+        )
+
+    @staticmethod
+    def attivazione_pendente(anzianita=30):
+        """ Recupera i corsi con attivazione pendente
+        creati > anzianità o con ultima notifica di
+        pendenza > anzianità"""
+
+        prima_del = timezone.now() - datetime.timedelta(days=anzianita)
+        # TODO: check with more data
+        return CorsoBase.objects.filter(Q(stato=CorsoBase.PREPARAZIONE,
+                                          data_inizio__gte=timezone.now()),
+                                        Q(creazione__lte=prima_del, ultima_notifica__isnull=True) |
+                                        Q(ultima_notifica_pendenza__lte=anzianita))
 
 
 class InvitoCorsoBase(ModelloSemplice, ConAutorizzazioni, ConMarcaTemporale, models.Model):
