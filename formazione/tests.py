@@ -1104,3 +1104,50 @@ class TestFunzionaleFormazione(TestFunzionale):
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue(sessione_secondo.is_text_present('Errore nel processo di registrazione.'),
                         msg="Errore link")
+
+    def test_corso_pendente(self):
+        soggetti = dict(presidente=None, aspirante=None)
+
+        for k in soggetti.keys():
+            soggetti[k] = crea_persona()
+            soggetti[k].email_contatto = email_fittizzia()
+            soggetti[k].codice_fiscale = codice_fiscale()
+            soggetti[k].save()
+
+        presidente, aspirante = soggetti.values()
+
+        crea_utenza(presidente, presidente.email_contatto)
+        direttore, sede, appartenenza = crea_persona_sede_appartenenza(presidente=presidente)
+
+        a = Aspirante(persona=aspirante)
+        a.locazione = sede.locazione
+        a.save()
+
+        oggi = timezone.now() - timedelta(days=30)
+        corso = CorsoBase.objects.create(
+            stato=CorsoBase.ATTIVO,
+            sede=sede,
+            data_inizio=oggi + timedelta(days=7),
+            data_esame=oggi + timedelta(days=14),
+            progressivo=1,
+            anno=oggi.year,
+            descrizione='Un corso',
+        )
+
+        self.client.login(username=presidente.email_contatto, password='prova')
+
+        # Iscrizione aspirante
+        iscritto = {
+            'persone': [aspirante.pk]
+        }
+
+        response = self.client.post('/aspirante/corso-base/{}/iscritti/aggiungi/'.format(corso.pk), data=iscritto)
+        self.assertEqual(corso.inviti.count(), 1)
+
+        pendenti = CorsoBase.attivazione_pendente()
+        self.assertEqual(pendenti.count(), 1)
+
+        for p in pendenti:
+            self.assertEqual(p.numero_partecipazioni_in_attesa_e_inviti(), 1)
+            p.informa_presidente_corso_pendente()
+            # TODO: utile controllare messaggio?

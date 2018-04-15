@@ -15,4 +15,4 @@ class CronNotificaCorsiBaseDaAttivare(CronJobBase):
     def do(self):
         pendenti = CorsoBase.attivazione_pendente()
         for p in pendenti:
-            p.informa_presidente()
+            p.informa_presidente_corso_pendente()

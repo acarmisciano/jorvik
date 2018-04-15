@@ -385,21 +385,22 @@ class CorsoBase(Corso, ConVecchioID, ConPDF):
         )
         return pdf
 
-    def informa_presidente(self):
+    def informa_presidente_corso_pendente(self):
         """ Invia una notifica al presidente informandolo di
-        qualcosa riferita al corso """
+        corso in attesa di attivazione """
         if not self.sede:
             return
 
         if not self.sede.presidente:
             return
 
-        # TODO:
         Messaggio.costruisci_e_accoda(
             oggetto="Corso in preparazione %s" % self.nome,
             modello="email_notifica_corso_pendente.html",
             corpo={
                 "corso": self,
+                "partecipanti": self.numero_partecipazioni_in_attesa_e_inviti(), #TODO: è il numero desiderato
+                "presidente": self.sede.presidente
             },
             destinatari=[self.sede.presidente],
         )
@@ -408,14 +409,14 @@ class CorsoBase(Corso, ConVecchioID, ConPDF):
     def attivazione_pendente(anzianita=30):
         """ Recupera i corsi con attivazione pendente
         creati > anzianità o con ultima notifica di
-        pendenza > anzianità"""
+        pendenza > anzianità """
 
         prima_del = timezone.now() - datetime.timedelta(days=anzianita)
         # TODO: check with more data
         return CorsoBase.objects.filter(Q(stato=CorsoBase.PREPARAZIONE,
                                           data_inizio__gte=timezone.now()),
-                                        Q(creazione__lte=prima_del, ultima_notifica__isnull=True) |
-                                        Q(ultima_notifica_pendenza__lte=anzianita))
+                                        Q(creazione__lte=prima_del, ultima_notifica_pendenza__isnull=True) |
+                                        Q(ultima_notifica_pendenza__lte=prima_del))
 
 
 class InvitoCorsoBase(ModelloSemplice, ConAutorizzazioni, ConMarcaTemporale, models.Model):

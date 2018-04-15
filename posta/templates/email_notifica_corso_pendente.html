@@ -1,0 +1,17 @@
+{% extends 'email.html' %}
+
+{% block corpo %}
+
+<p class="grassetto">Ciao {{ presidente.nome_completo }}.</p>
+
+<p>Sono presenti corsi in attesa di attivazione:</p>
+
+<ul>
+    <li><span class="grassetto">Nome del corso: </span> {{ corso.nome }}</li>
+    <li><span class="grassetto">Partecipanti: </span> {{ partecipanti }}</li>
+</ul>
+
+<p>Guarda i dettagli su Gaia: <a href="{{ corso.url }}">{{ corso.url }}</a></p>
+<small>Se non riesci a cliccare sul link sopra riportato copialo e incollalo nel tuo browser.</small>
+
+{% endblock %}
