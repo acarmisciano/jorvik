@@ -925,26 +925,32 @@ class Persona(ModelloSemplice, ConMarcaTemporale, ConAllegati, ConVecchioID):
             return 'Non è presente alcun firmatario'
         if not motivazione:
             return 'Non è stata indicata la motivazione'
-        if not motivazione:
+        if not data:
             return 'Non è stata indicata data di trasferimento'
         try:
             if not isinstance(sede, Sede):
                 sede = Sede.objects.get(pk=int(sede))
         except (ValueError, Sede.DoesNotExist):
             return False
+
         data_inizio = datetime(data.year, data.month, data.day)
         if self.volontario and self.sede_riferimento() != sede:
-            trasferimento = Trasferimento.objects.create(
-                destinazione=sede,
-                persona=self,
-                richiedente=firmatario,
-                motivo=motivazione,
-            )
-            trasferimento.richiedi(notifiche_attive=False)
-            for autorizzazione in trasferimento.autorizzazioni:
-                autorizzazione.concedi(firmatario, auto=True, notifiche_attive=False, data=data_inizio)
-            trasferimento.refresh_from_db()
-            return trasferimento.appartenenza
+            with atomic():
+                appartenenza_vecchia = Appartenenza.objects.filter(
+                    Appartenenza.query_attuale().q, membro=Appartenenza.VOLONTARIO, persona=self
+                ).first()
+                appartenenza_vecchia.fine = mezzanotte_24_ieri(data_inizio)
+                appartenenza_vecchia.terminazione = Appartenenza.TRASFERIMENTO
+                appartenenza_vecchia.save()
+                self.chiudi_tutto(mezzanotte_24_ieri(data_inizio))
+
+                return Appartenenza.objects.create(
+                    membro=Appartenenza.VOLONTARIO,
+                    persona=self,
+                    sede=sede,
+                    inizio=mezzanotte_00(data_inizio),
+                    precedente=appartenenza_vecchia
+                )
         else:
             return 'La persone non è un volontario o è già nella sede indicata'
 
